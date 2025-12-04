@@ -111,13 +111,12 @@ The CER is converted into a reward signal (Scalar [0, 1]). A lower CER results i
 
 **Step 7: Agent Update (Contextual Bandit)**
 The agent is updated using the collected experience tuple `(State, Action, Reward)`.
+
 *   **State**: Input text vector (1024-dim).
 *   **Action**: The actual vector of the retrieved prompt (100-dim).
 *   **Reward**: The calculated reward.
+
 The model minimizes the weighted distance between its prediction and the successful prompt vector, effectively reinforcing the selection of prompts that lead to high-quality audio generation.
-
-
-
 
 ### Agent Model Structure
 
@@ -141,11 +140,7 @@ The system utilizes a **Contextual Bandit** formulation to optimize the prompt s
 
     $$ \mathcal{L}(\theta) = R \cdot || \pi_\theta(s) - a_{retrieved} ||^2 $$
 
-    *   **Interpretation**: If a prompt yields a high reward (low CER), the agent updates its weights to predict vectors closer to that prompt in the future. If the reward is low, the gradient is scaled down, effectively ignoring poor examples. 
-
-
-
-
+    *   **Interpretation**: If a prompt yields a high reward (low CER), the agent updates its weights to predict vectors closer to that prompt in the future. If the reward is low, the gradient is scaled down, effectively ignoring poor examples.
 
 ### File Descriptions
 
