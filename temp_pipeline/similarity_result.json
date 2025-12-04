@@ -1,0 +1,7 @@
+{
+    "index": 62940,
+    "l2_distance": 0.09082883596420288,
+    "cosine_similarity": 0.9545855820178986,
+    "prompt_wav": "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav",
+    "prompt_transcription": "Et \u00e0 mesure que les d\u00e9tails allaient se croisant, ils se corroboraient l'un l'autre"
+}

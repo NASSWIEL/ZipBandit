@@ -1,0 +1,429 @@
+Pipeline Started
+Input Sentence: "Vers midi un bruit très éloigné se fait entendre"
+[1/7] Running Text Encoder...
+
+/info/etu/m2/s2405959/miniconda3/envs/agent_env/lib/python3.10/site-packages/torch/__init__.py:1551: UserWarning: Please use the new API settings to control TF32 behavior, such as torch.backends.cudnn.conv.fp32_precision = 'tf32' or torch.backends.cuda.matmul.fp32_precision = 'ieee'. Old settings, e.g, torch.backends.cuda.matmul.allow_tf32 = True, torch.backends.cudnn.allow_tf32 = True, allowTF32CuDNN() and allowTF32CuBLAS() will be deprecated after Pytorch 2.9. Please see https://pytorch.org/docs/main/notes/cuda.html#tensorfloat-32-tf32-on-ampere-and-later-devices (Triggered internally at /pytorch/aten/src/ATen/Context.cpp:80.)
+  return _C._get_float32_matmul_precision()
+Loading SONAR Text model on cpu...
+Vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_1024.npy
+Iteration 1 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9240
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 21:48:46,217 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 21:48:46,217 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 21:48:46,218 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 21:48:49,389 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 21:48:50,785 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 21:48:52,753 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 21:48:57,514 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 21:48:57,515 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 1 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000653, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Iteration 2 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9277
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 21:52:42,317 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 21:52:42,317 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 21:52:42,318 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 21:52:45,272 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 21:52:46,642 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 21:52:48,778 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 21:52:53,431 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 21:52:53,432 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 2 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000616, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Iteration 3 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9313
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 21:56:42,643 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 21:56:42,644 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 21:56:42,644 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 21:56:45,932 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 21:56:47,244 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 21:56:49,443 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 21:56:54,194 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 21:56:54,194 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 3 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000581, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Iteration 4 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9349
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 22:00:48,137 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 22:00:48,137 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 22:00:48,138 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 22:00:51,395 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 22:00:52,778 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 22:00:54,989 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 22:00:59,933 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 22:00:59,933 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 4 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000547, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Iteration 5 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9384
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 22:04:48,095 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 22:04:48,096 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 22:04:48,096 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 22:04:51,349 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 22:04:52,778 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 22:04:55,055 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 22:05:00,556 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 22:05:00,557 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 5 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000513, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Iteration 6 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9418
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 22:08:44,045 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 22:08:44,045 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 22:08:44,045 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 22:08:47,278 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 22:08:48,655 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 22:08:50,784 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 22:08:55,257 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 22:08:55,257 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 6 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000481, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Iteration 7 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9451
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 22:12:41,104 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 22:12:41,105 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 22:12:41,105 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 22:12:44,315 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 22:12:45,702 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 22:12:47,699 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 22:12:52,514 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 22:12:52,515 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 7 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000450, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Iteration 8 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9484
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 22:16:42,169 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 22:16:42,170 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 22:16:42,170 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 22:16:45,373 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 22:16:46,710 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 22:16:48,953 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 22:16:53,749 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 22:16:53,750 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 8 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000420, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Iteration 9 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9515
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 22:20:47,886 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 22:20:47,886 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 22:20:47,886 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 22:20:50,876 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 22:20:52,250 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 22:20:54,364 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 22:20:59,215 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 22:20:59,215 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 9 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000391, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Iteration 10 / 10
+[2/7] Running Agent Model...
+Agent output saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy
+[3/7] Running Similarity Search...
+Loaded vector from /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/vec_100.npy with shape (1, 100)
+Result Found (Index 62940)
+Cosine Similarity: 0.9546
+WAV File: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Transcription: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Result saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/similarity_result.json
+Retrieved vector saved to /info/raid-etu/m2/s2405959/VO2/Agent/temp_pipeline/retrieved_vec_100.npy
+[4/7] Generating Audio with ZipVoice...
+2025-12-04 22:24:47,609 INFO [infer_zipvoice.py:743] Setting num_step to default value: 16
+2025-12-04 22:24:47,609 INFO [infer_zipvoice.py:743] Setting guidance_scale to default value: 1.0
+2025-12-04 22:24:47,610 INFO [infer_zipvoice.py:767] Using pretrained zipvoice model from the Huggingface
+2025-12-04 22:24:50,787 INFO [checkpoint.py:114] Loading checkpoint from /info/raid-etu/m2/s2405959/.huggingface/models--k2-fsa--ZipVoice/snapshots/2fe18de429ca87690bd6e042bf8de5dbac7a69ec/zipvoice/model.pt
+2025-12-04 22:24:52,175 INFO [infer_zipvoice.py:819] Device: cuda:0
+/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/lib/python3.11/site-packages/vocos/pretrained.py:70: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(model_path, map_location="cpu")
+2025-12-04 22:24:54,220 INFO [infer_zipvoice.py:836] Start generating...
+2025-12-04 22:24:58,994 INFO [infer_zipvoice.py:883] Saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+2025-12-04 22:24:58,994 INFO [infer_zipvoice.py:884] Done
+Selected Prompt WAV: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav
+Selected Prompt Text: Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre
+Running ZipVoice Inference...
+Command: /info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python -m zipvoice.bin.infer_zipvoice --model-name zipvoice --prompt-wav /info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/PF_VAMP_NEB_01_0027_268958_273778.wav --prompt-text Et à mesure que les détails allaient se croisant, ils se corroboraient l'un l'autre --text Vers midi un bruit très éloigné se fait entendre --res-wav-path /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Inference successful. Audio saved to: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+Generated Audio: /info/corpus/Blizzard2023_segmented/segmented/NEB_train/RL_train/Vers_midi_PF_VAMP_NEB_01_0027_268958_273778.wav
+[5/7] Calculating CER...
+Warning: num2words not installed. Number normalization will be skipped.
+Install with: pip install num2words
+Loading ASR model: openai/whisper-large-v3
+   Language: fr
+   Device: cpu
+Model loaded successfully
+CER: 0.6250
+[6/7] Calculating Weighted Reward...
+Reward: 0.3750
+Iteration 10 Reward: 0.3750
+[7/7] Training Agent (Contextual Bandit Update)...
+Training Step Complete. Loss: 0.000363, Reward: 0.3750
+Model saved to /info/raid-etu/m2/s2405959/VO2/Agent/model/agent_model.pth
+Pipeline Completed
