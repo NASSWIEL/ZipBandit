@@ -137,10 +137,10 @@ The system utilizes a **Contextual Bandit** formulation to optimize the prompt s
 *   **Policy ($\pi_\theta$)**: A deterministic neural network that predicts an ideal action vector $\hat{a} = \pi_\theta(s)$. The actual action taken is the **Nearest Neighbor** of $\hat{a}$ in the pre-computed vector database.
 *   **Update Rule (Reward-Weighted Regression)**:
     The model parameters $\theta$ are updated to minimize the weighted Mean Squared Error (MSE) between the predicted vector $\hat{a}$ and the executed action vector $a_{retrieved}$, scaled by the observed reward $R$.
-
-    $$
-     \mathcal{L}(\theta) = R \cdot || \pi_\theta(s) - a_{retrieved} ||^2
-    $$
+$$
+\mathcal{L}(\theta)
+= R \cdot \lVert \pi_\theta(s) - a_{\text{retrieved}} \rVert^{2}
+$$
 
     *   **Interpretation**: If a prompt yields a high reward (low CER), the agent updates its weights to predict vectors closer to that prompt in the future. If the reward is low, the gradient is scaled down, effectively ignoring poor examples.
 
