@@ -138,7 +138,9 @@ The system utilizes a **Contextual Bandit** formulation to optimize the prompt s
 *   **Update Rule (Reward-Weighted Regression)**:
     The model parameters $\theta$ are updated to minimize the weighted Mean Squared Error (MSE) between the predicted vector $\hat{a}$ and the executed action vector $a_{retrieved}$, scaled by the observed reward $R$.
 
-    $$ \mathcal{L}(\theta) = R \cdot || \pi_\theta(s) - a_{retrieved} ||^2 $$
+    $$
+     \mathcal{L}(\theta) = R \cdot || \pi_\theta(s) - a_{retrieved} ||^2
+    $$
 
     *   **Interpretation**: If a prompt yields a high reward (low CER), the agent updates its weights to predict vectors closer to that prompt in the future. If the reward is low, the gradient is scaled down, effectively ignoring poor examples.
 
