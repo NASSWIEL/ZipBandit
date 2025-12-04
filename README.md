@@ -143,7 +143,7 @@ $$
 = R \cdot \lVert \pi_\theta(s) - a_{\text{retrieved}} \rVert^{2}
 $$
 
-    *   **Interpretation**: If a prompt yields a high reward (low CER), the agent updates its weights to predict vectors closer to that prompt in the future. If the reward is low, the gradient is scaled down, effectively ignoring poor examples.
+*   **Interpretation**: If a prompt yields a high reward (low CER), the agent updates its weights to predict vectors closer to that prompt in the future. If the reward is low, the gradient is scaled down, effectively ignoring poor examples.
 
 ### File Descriptions
 
