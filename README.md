@@ -156,49 +156,59 @@ The agent is implemented as a **Deep Residual Network** using PyTorch, designed 
 
 The system utilizes a **Contextual Bandit** formulation with advanced exploration strategies to optimize the prompt selection policy in an online setting.
 
-*   **State ($s$)**: The 1024-dim embedding of the input text.
-*   **Action ($a$)**: The 256-dim embedding of the audio prompt.
-*   **Policy ($\pi_\theta$)**: A deep neural network that predicts an ideal action vector $\hat{a} = \pi_\theta(s)$. The actual action taken is the **Nearest Neighbor** of $\hat{a}$ in the pre-computed vector database (FAISS index).
+*   **State (`s`)**: The 1024-dim embedding of the input text.
+*   **Action (`a`)**: The 256-dim embedding of the audio prompt.
+*   **Policy (`π_θ`)**: A deep neural network that predicts an ideal action vector  
+    `â = π_θ(s)`.  
+    The actual action taken is the **Nearest Neighbor** of `â` in the pre-computed vector database (FAISS index).
 
 *   **Update Rule (Hybrid Loss)**:
-    The model parameters $\theta$ are updated using a combination of losses:
+    The model parameters `θ` are updated using a combination of losses:
 
     1.  **Contrastive Loss** (reward-weighted attraction/repulsion):
-        $$
-        \mathcal{L}_{contrastive} = \begin{cases} 
-        \lambda(R) \cdot \| \pi_\theta(s) - a_{retrieved} \|^2 & \text{if } R > R_{mean} \text{ (attraction)} \\
-        -\lambda(R) \cdot \| \pi_\theta(s) - a_{retrieved} \|^2 & \text{if } R \leq R_{mean} \text{ (repulsion)}
-        \end{cases}
-        $$
-        Where $\lambda(R)$ is a dynamic weight based on normalized reward.
+
+        ```text
+        If R > R_mean (attraction):
+            L_contrastive =  λ(R) · || π_θ(s) − a_retrieved ||²
+
+        If R ≤ R_mean (repulsion):
+            L_contrastive = −λ(R) · || π_θ(s) − a_retrieved ||²
+        ```
+
+        Where `λ(R)` is a dynamic weight based on normalized reward.
 
     2.  **Value Loss** (advantage estimation):
-        $$
-        \mathcal{L}_{value} = (V_\phi(s) - R)^2
-        $$
-        Where $V_\phi(s)$ is the predicted value from the value head.
+
+        ```text
+        L_value = ( V_φ(s) − R )²
+        ```
+
+        Where `V_φ(s)` is the predicted value from the value head.
 
     3.  **Entropy Regularization** (exploration):
-        $$
-        \mathcal{L}_{entropy} = -\beta_{entropy} \cdot H(\pi_\theta)
-        $$
+
+        ```text
+        L_entropy = −β_entropy · H(π_θ)
+        ```
 
     4.  **Diversity Penalty** (prevent collapse):
-        $$
-        \mathcal{L}_{diversity} = \beta_{diversity} \cdot \frac{\text{count}(a)}{\sum \text{counts}}
-        $$
 
-    **Total Loss**: 
-    $$
-    \mathcal{L}(\theta) = \mathcal{L}_{contrastive} + \mathcal{L}_{value} + \mathcal{L}_{entropy} + \mathcal{L}_{diversity}
-    $$
+        ```text
+        L_diversity = β_diversity · ( count(a) / sum(counts) )
+        ```
+
+    **Total Loss**:
+
+    ```text
+    L(θ) = L_contrastive + L_value + L_entropy + L_diversity
+    ```
 
 *   **Exploration Strategy**:
-    - **Epsilon-greedy**: With probability $\epsilon$ (decaying from 0.5 to 0.05), explore randomly.
+    - **Epsilon-greedy**: With probability `ε` (decaying from 0.5 to 0.05), explore randomly.
     - **Manifold-aware exploration**: When exploring, sample from k-means centroids of prompt space.
     - **Fixed epsilon during warm-up**: Prevents premature exploitation before learning.
 
-*   **Experience Replay**: 
+*   **Experience Replay**:
     - Buffer stores `(state, action, reward)` tuples with maximum capacity (default: 1000).
     - Prioritized sampling: Higher rewards are sampled more frequently.
     - Batch updates with batch size 32.
