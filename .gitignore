@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# Log files
+*.log
+logs_agent/
+logs/
+
+# Checkpoints and model backups
+checkpoint/
+*.pth
+*.pt
+*.backup_*
+model/agent_model.pth.backup_*
+model/replay_buffer.pkl.backup_*
+
+# Replay buffer
+*.pkl
+replay_buffer.pkl
+
+# Temporary pipeline artifacts
+temp_pipeline/
+
+# SLURM output files
+slurm-*.out
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (optional - uncomment if you don't want to track data)
+# DB/sentences*.txt
+# vectors/
