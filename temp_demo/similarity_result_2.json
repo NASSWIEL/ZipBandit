@@ -1,0 +1,7 @@
+{
+  "cosine_similarity": 1.0,
+  "nearest_idx": -1,
+  "prompt_wav": "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/FL_MB_NEB_02_0005_25601_35766.wav",
+  "prompt_transcription": "L'apothicaire avait emmen\u00e9 avec lui Napol\u00e9on et Athalie, pour leur faire faire de l'exercice, et Justin les accompagnait, portant des parapluies sur son \u00e9paule",
+  "l2_distance": 0.0
+}

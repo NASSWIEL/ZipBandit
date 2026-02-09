@@ -11,7 +11,7 @@ from tqdm import tqdm
 # Paths
 TSV_PATH = "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/NEB_test_clean.tsv"
 DB_DIR = "/info/raid-etu/m2/s2405959/VO2/Agent/DB"
-# EXPERT FIX: New directory for 256-dim embeddings
+# 256-dim embeddings directory
 VECTORS_DIR = "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/vectors_256"
 FAISS_INDEX_PATH = os.path.join(VECTORS_DIR, "prompts.index")
 METADATA_PATH = os.path.join(VECTORS_DIR, "prompts_metadata.pkl")
@@ -58,7 +58,7 @@ def main():
     embeddings_1024 = generate_embeddings(df, device=device)
     print(f"Generated embeddings shape: {embeddings_1024.shape}")
     
-    # EXPERT FIX: Apply PCA to reduce to 256 dims (instead of 100)
+    # Apply PCA to reduce from 1024 to 256 dimensions
     print("Fitting PCA (1024 -> 256)...")
     pca = PCA(n_components=256)
     embeddings_256 = pca.fit_transform(embeddings_1024)
@@ -71,7 +71,7 @@ def main():
         
     # Create FAISS index (256 dims)
     print("Creating FAISS index...")
-    d = 256  # EXPERT FIX: Updated from 100 to 256
+    d = 256
     index = faiss.IndexFlatL2(d)
     
     # Normalize for Cosine Similarity (L2 distance on normalized vectors <=> Cosine Similarity)

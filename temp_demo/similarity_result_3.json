@@ -1,0 +1,7 @@
+{
+  "cosine_similarity": 1.0,
+  "nearest_idx": -1,
+  "prompt_wav": "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/ES_LMP_NEB_01_0010_37454_40021.wav",
+  "prompt_transcription": "C'est au contraire un bien pour nous, monsieur Rodolphe",
+  "l2_distance": 0.0
+}

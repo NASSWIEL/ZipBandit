@@ -1,5 +1,48 @@
 import torch
 import numpy as np
+import os
+import logging
+import sys
+import warnings
+from contextlib import contextmanager
+
+# Suppress fairseq2/tqdm progress bars for weight loading
+# Must be set BEFORE importing sonar
+os.environ["TQDM_DISABLE"] = "1"
+os.environ["FAIRSEQ2_LOG_LEVEL"] = "ERROR"
+os.environ["FAIRSEQ2_PROGRESS"] = "0"
+
+# Suppress tqdm globally
+from tqdm import tqdm
+from functools import partialmethod
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
+
+# Suppress fairseq2 and related logging
+for logger_name in ["fairseq2", "fairseq2.nn", "fairseq2.nn.transformer", 
+                    "fairseq2.models", "fairseq2.data"]:
+    logging.getLogger(logger_name).setLevel(logging.CRITICAL)
+
+# Suppress warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
+@contextmanager
+def suppress_stdout_stderr():
+    """Context manager to suppress stdout and stderr output."""
+    # Save original stdout/stderr
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    try:
+        # Redirect to devnull
+        sys.stdout = open(os.devnull, 'w')
+        sys.stderr = open(os.devnull, 'w')
+        yield
+    finally:
+        # Restore
+        sys.stdout.close()
+        sys.stderr.close()
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
+
 from sonar.inference_pipelines.text import TextToEmbeddingModelPipeline
 
 # Global cache for reusing the encoder across calls
@@ -29,14 +72,17 @@ class TextEncoder:
             # print("[CACHE] Reusing cached SONAR Text model")
             self.model = _ENCODER_CACHE
         else:
-            print(f"Loading SONAR Text model on {self.device}...")
+            print(f"Loading SONAR Text model on {self.device}...", flush=True)
             # We use the multilingual SONAR text encoder
             # 'text_sonar_basic_encoder' is the standard multilingual text encoder
-            self.model = TextToEmbeddingModelPipeline(
-                encoder="text_sonar_basic_encoder", 
-                tokenizer="text_sonar_basic_encoder",
-                device=self.device
-            )
+            # Suppress the "Loading weights" progress bar output
+            with suppress_stdout_stderr():
+                self.model = TextToEmbeddingModelPipeline(
+                    encoder="text_sonar_basic_encoder", 
+                    tokenizer="text_sonar_basic_encoder",
+                    device=self.device
+                )
+            print("SONAR Text model loaded.", flush=True)
             
             if use_cache:
                 _ENCODER_CACHE = self.model

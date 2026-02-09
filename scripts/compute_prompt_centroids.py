@@ -16,7 +16,7 @@ import os
 from sklearn.cluster import KMeans
 
 # Configuration
-DEFAULT_VECTORS_DIR = "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/vectors_256_1k"
+DEFAULT_VECTORS_DIR = "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/vectors_256"
 
 
 def extract_vectors_from_faiss(index_path):

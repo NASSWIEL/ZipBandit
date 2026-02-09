@@ -207,7 +207,7 @@ def generate_statistics_report(df, output_dir):
         
         # Mode collapse detection
         if prompt_counts.iloc[0] / len(df) > 0.3:
-            report.append(f"⚠️  MODE COLLAPSE DETECTED: Top prompt used >{prompt_counts.iloc[0]/len(df)*100:.1f}% of the time!")
+            report.append(f"[WARNING] MODE COLLAPSE DETECTED: Top prompt used >{prompt_counts.iloc[0]/len(df)*100:.1f}% of the time!")
         report.append("")
     
     # Entropy stats

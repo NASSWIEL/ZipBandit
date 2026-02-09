@@ -1,0 +1,58 @@
+% info_nce_terms.tex
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{margin=1in}
+\begin{document}
+\section*{Explication terme à terme : InfoNCE et Loss valeur}
+
+\subsection*{InfoNCE (perte contrastive)}
+\begin{equation}
+L_{\text{contr}} \,=\, -\frac{1}{N}\sum_{i=1}^{N} \log\frac{\exp\big(s_{i}^{+}/\tau\big)}{\exp\big(s_{i}^{+}/\tau\big) + \sum_{j}\exp\big(s_{ij}^{-}/\tau\big)}
+\end{equation}
+
+Explications des symboles et lien avec le code (voir \texttt{train_agent.py} / \texttt{compute_info_nce_loss}):
+\begin{itemize}
+  \item $s_{i}^{+}$ : similarité entre la prédiction $y_i$ et une action positive (ex. action avec bonne récompense). Dans le code, on calcule les similarités cosinus normalisées par la température: \texttt{pos\_sim = torch.mm(predictions, positive\_actions.T) / temperature}. \\ 
+  \item $s_{ij}^{-}$ : similarité entre la prédiction $y_i$ et une action négative (ex. faible récompense). Dans le code : \texttt{neg\_sim = torch.mm(predictions, negative\_actions.T) / temperature}. \\ 
+  \item $\tau$ (température) : contrôle la "raideur" du softmax; petite valeur rend les différences plus marquées. Dans le code, c'est l'argument \texttt{temperature} passé à \texttt{compute\_info\_nce\_loss}. \\ 
+  \item Moyenne positive ($s_i^{+}$ moyenne) : le code moyenne les similarités positives par prédiction avant de concaténer avec les négatives : \texttt{pos\_mean = pos\_sim.mean(dim=1, keepdim=True)}. Cela produit un logit positif unique par prédiction. \\ 
+  \item logits et étiquette : on concatène la colonne positive et les colonnes négatives (\texttt{all\_sim = torch.cat([pos\_mean, neg\_sim], dim=1)}) puis on applique \texttt{F.cross\_entropy(all\_sim, labels)} avec \texttt{labels=0} (première colonne = positif). Ainsi InfoNCE = cross-entropy qui classe la colonne positive comme la bonne. 
+\end{itemize}
+
+\subsection*{Rôle pratique}
+\begin{itemize}
+  \item Rapproche les prédictions des actions ayant obtenu une bonne récompense (pull). 
+  \item Éloigne des actions faibles (push) via les termes négatifs. 
+  \item Agit comme régularisation / signal supplémentaire pour aligner l'espace des embeddings de l'agent avec celui des prompts.
+\end{itemize}
+
+\subsection*{Loss valeur (value loss)}
+\begin{equation}
+L_{\text{value}} \,=\, \frac{1}{N}\sum_{i=1}^{N} \big(V_{\phi}(s_i) - r_i\big)^2
+\end{equation}
+
+Explications et correspondance code (voir \texttt{train_agent.py} / usage de la tête valeur) :
+\begin{itemize}
+  \item $V_{\phi}(s_i)$ : prédiction de la tête valeur (sortie \texttt{value} du modèle, contrainte en [0,1] par un \texttt{Sigmoid}). Code : \texttt{value = self.value_head(value_features)} dans \texttt{agent_model.py}. \\ 
+  \item $r_i$ : récompense observée (ou récompense tronquée/clampée dans le batch : \texttt{rewards\_clipped = torch.clamp(rewards, min=0.01, max=0.99)} dans l'entraînement). \\ 
+  \item MSE : le code minimise l'erreur quadratique moyenne entre prédiction et récompense réelle : \texttt{value\_loss = F.mse\_loss(value.squeeze(), rewards\_clipped)} (ou dans \texttt{train\_step} : \texttt{value\_target = reward\_tensor.view\_as(value); value\_loss = F.mse\_loss(value, value\_target)} ).
+\end{itemize}
+
+\subsection*{Termes additionnels liés au code}
+\begin{itemize}
+  \item \textbf{Normalisation des vecteurs} : avant calcul des similarités, les vecteurs sont normalisés (L2) dans le modèle et dans \texttt{compute\_info\_nce\_loss} — cela rend les produits scalaires équivalents aux cosinus. 
+  \item \textbf{Température} $\tau$ : dans le code fixée par défaut à 0.1, influence la sensibilité du softmax. 
+  \item \textbf{Usage dans la loss finale} : \texttt{contrastive\_loss} est pondéré (ex. \texttt{0.3 * contrastive\_loss}) et ajouté à la loss principale; voir la combinaison dans \texttt{train\_step}. 
+\end{itemize}
+
+\subsection*{Conseils pratiques}
+\begin{itemize}
+  \item Vérifier que les vecteurs sont correctement normalisés (cos-sim). 
+  \item Ajuster la température $\tau$ pour mieux séparer positifs/négatifs si InfoNCE ne contribue pas. 
+  \item Utiliser la tête valeur comme baseline (optionnel) pour réduire encore la variance : remplacer baseline fixe par $V(s)$ dans le calcul de l'avantage. 
+\end{itemize}
+
+\end{document}

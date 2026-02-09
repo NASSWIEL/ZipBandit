@@ -24,8 +24,6 @@ class ReplayBuffer:
         """
         Initialize replay buffer.
         
-        EXPERT FIX: Updated action_dim from 100 to 256 for better representation.
-        
         Args:
             capacity (int): Maximum number of experiences to store.
             state_dim (int): Dimension of state vectors (1024 for SONAR).
@@ -75,7 +73,7 @@ class ReplayBuffer:
             batch_size = self.size
         
         if diversity_sampling and self.size > batch_size * 2:
-            # CRITICAL FIX: Diversity-aware sampling
+            # Diversity-aware sampling
             # Sample more candidates and select most diverse subset
             candidate_size = min(batch_size * 4, self.size)
             candidate_indices = np.random.choice(self.size, candidate_size, replace=False)

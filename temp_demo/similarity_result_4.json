@@ -1,0 +1,7 @@
+{
+  "cosine_similarity": 1.0,
+  "nearest_idx": -1,
+  "prompt_wav": "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/FL_MB_NEB_02_0015_44336_45868.wav",
+  "prompt_transcription": "Un peu plus bas, cependant",
+  "l2_distance": 0.0
+}

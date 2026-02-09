@@ -1,0 +1,64 @@
+% policy_loss.tex
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\geometry{margin=1in}
+\begin{document}
+\section*{Formules de loss (policy gradient + InfoNCE)}
+
+% Policy gradient loss (REINFORCE)
+\subsection*{Policy loss (REINFORCE)}
+\begin{equation}
+L_{\text{pg}} \,=\, -\mathbb{E}_{s,a}\big[\log \pi_{\theta}(a\mid s)\; A(s,a)\big]
+\end{equation}
+
+Formulation discrète utilisée dans le code (avec similarité cosinus comme proxy de probabilité) :
+\begin{equation}
+L_{\text{pg}} \,=\, -\frac{1}{N}\sum_{i=1}^{N} \log\big(\mathrm{sim}(y_i,a_i)\big)\cdot (r_i - b)
+\end{equation}
+
+où $\mathrm{sim}(y,a)$ est la similarité (cosine similarity), $r_i$ la récompense, et $b$ le baseline.
+
+% InfoNCE
+\subsection*{Loss contrastif (InfoNCE)}
+\begin{equation}
+L_{\text{contr}} \,=\, -\frac{1}{N}\sum_{i=1}^{N} \log\frac{\exp\big(s_{i}^{+}/\tau\big)}{\exp\big(s_{i}^{+}/\tau\big) + \sum_{j}\exp\big(s_{ij}^{-}/\tau\big)}
+\end{equation}
+
+avec $s_{i}^{+}$ la similarité positive (prediction vs action positive), $s_{ij}^{-}$ les similarités négatives, et $\tau$ la température.
+
+% Value loss
+\subsection*{Loss valeur}
+\begin{equation}
+L_{\text{value}} \,=\, \frac{1}{N}\sum_{i=1}^{N} \big(V_{\phi}(s_i) - r_i\big)^2
+\end{equation}
+
+% Final combined loss
+\subsection*{Loss final combiné}
+\begin{equation}
+L \,=\, 1.0\,L_{\text{pg}} \; + \; 0.3\,L_{\text{contr}} \; + \; 0.5\,L_{\text{value}} \; + \; L_{\text{value\_reg}} \; - \; \lambda_{\text{ent}}\,H \; + \; \alpha\,D
+\end{equation}
+
+Avec en pratique dans le code :
+\begin{itemize}
+  \item $L_{\text{value\_reg}} = -0.01\cdot\mathrm{Var}(V)$ (régularisation pour éviter l'effondrement de la tête valeur).
+  \item $H$ est l'\emph{entropy\_bonus} (proxy: variance des sorties + diversité de batch) ; il est soustrait pour encourager l'exploration.
+  \item $D$ est la pénalité de diversité des prompts (contrôle l'usage répétitif d'un prompt).
+  \item $\lambda_{\text{ent}}$ correspond à `entropy_coef` et $\alpha$ à `diversity_penalty_weight` dans le code.
+\end{itemize}
+
+\subsection*{Correspondance variables \textbackslash code}
+\begin{itemize}
+  \item $\log \pi_\theta(a|s)$ \;↔\; `log_prob = torch.log(cos_sim.clamp(min=1e-8))`
+  \item $A(s,a)$ \;↔\; `advantage = reward - baseline` (ou normalisé)
+  \item $L_{\text{contr}}$ \;↔\; `contrastive_loss = compute_info_nce_loss(...)`
+  \item $L_{\text{value}}$ \;↔\; `value_loss = F.mse_loss(value, reward)`
+  \item $H$ \;↔\; `entropy_bonus = pred_std + 0.5 * batch_diversity`
+\end{itemize}
+
+\vspace{6pt}
+\noindent \textbf{Remarque courte :} la perte de politique est volontairement négative (on minimise $-E[\log \pi A]$ pour maximiser $E[\log \pi A]$), donc des valeurs plus négatives indiquent une amélioration (l'agent renforce les actions avec advantage positif).
+
+\end{document}

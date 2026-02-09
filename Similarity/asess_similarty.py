@@ -6,31 +6,69 @@ import argparse
 import torch
 
 # --- CONFIGURATION ---
-# Using 256-dim vectors directory (1K sentences for testing, change to vectors_256 for full 63K)
-BASE_VECTORS_DIR = "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/vectors_256_1k"
+# Using 256-dim vectors directory with FULL 63K prompts dataset
+BASE_VECTORS_DIR = "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/vectors_256"
 
+# Support for subset index (5K embeddings for faster RL training)
+# The subset index reduces the action space from 63K to 5K prompts
+SUBSET_VECTORS_DIR = "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/vectors_256_subset"
+
+# Default to subset for training (can be overridden via --use_full_index)
+USE_SUBSET_BY_DEFAULT = True
+
+def get_index_paths(use_subset=True):
+    """Get the appropriate index and metadata paths based on configuration."""
+    if use_subset and os.path.exists(os.path.join(SUBSET_VECTORS_DIR, "prompts.index")):
+        base_dir = SUBSET_VECTORS_DIR
+        print(f"Using SUBSET index (5K prompts) from {base_dir}")
+    else:
+        base_dir = BASE_VECTORS_DIR
+        if use_subset:
+            print(f"Warning: Subset index not found, falling back to FULL index")
+        print(f"Using FULL index (63K prompts) from {base_dir}")
+    
+    index_path = os.path.join(base_dir, "prompts.index")
+    meta_path = os.path.join(base_dir, "prompts_metadata.pkl")
+    
+    return index_path, meta_path, base_dir
+
+# Legacy paths for backward compatibility
 INDEX_PATH = os.path.join(BASE_VECTORS_DIR, "prompts.index")
 META_PATH = os.path.join(BASE_VECTORS_DIR, "prompts_metadata.pkl")
 
-def load_database():
-    """Loads the FAISS index and Pickle metadata into memory."""
-    if not os.path.exists(INDEX_PATH):
-        raise FileNotFoundError(f"Index file not found: {INDEX_PATH}")
-    index = faiss.read_index(INDEX_PATH)
+def load_database(use_subset=None):
+    """
+    Loads the FAISS index and Pickle metadata into memory.
     
-    if not os.path.exists(META_PATH):
-        raise FileNotFoundError(f"Metadata file not found: {META_PATH}")
-    with open(META_PATH, 'rb') as f:
+    Args:
+        use_subset: If True, use subset index. If False, use full index.
+                   If None, use the default (USE_SUBSET_BY_DEFAULT).
+    
+    Returns:
+        index: FAISS index
+        metadata: List of metadata dictionaries
+    """
+    if use_subset is None:
+        use_subset = USE_SUBSET_BY_DEFAULT
+    
+    index_path, meta_path, _ = get_index_paths(use_subset)
+    
+    if not os.path.exists(index_path):
+        raise FileNotFoundError(f"Index file not found: {index_path}")
+    index = faiss.read_index(index_path)
+    
+    if not os.path.exists(meta_path):
+        raise FileNotFoundError(f"Metadata file not found: {meta_path}")
+    with open(meta_path, 'rb') as f:
         metadata = pickle.load(f)
     
+    print(f"Loaded index with {index.ntotal} vectors")
     return index, metadata
 
 def find_best_match(query_vector_256, index, metadata):
     """
     Takes a vector (1, 256) and returns the corresponding reference.
     Uses Cosine Similarity (via L2 normalization + Inner Product search).
-    
-    EXPERT FIX: Updated from 100-dim to 256-dim vectors.
     """
     # 1. Conversion and Normalization
     query = query_vector_256.astype(np.float32)
@@ -62,7 +100,7 @@ def find_best_match(query_vector_256, index, metadata):
         # Ensure index is a standard Python int for FAISS SWIG wrapper
         retrieved_vector = index.reconstruct(int(best_index))
     except Exception as e:
-        # Fallback if reconstruct is not supported (EXPERT FIX: 256 dims)
+        # Fallback if reconstruct is not supported
         retrieved_vector = np.zeros(256)
         print(f"Warning: Could not reconstruct vector from index. Error: {e}")
 
@@ -74,10 +112,14 @@ if __name__ == "__main__":
     parser.add_argument("--vector", type=str, help="Path to the input vector file (.npy or .pt)")
     parser.add_argument("--output", type=str, help="Path to save the result as JSON.")
     parser.add_argument("--output_vector", type=str, help="Path to save the retrieved vector (.npy).")
+    parser.add_argument("--use_full_index", action="store_true", 
+                        help="Use the full 63K index instead of the subset 5K index")
     args = parser.parse_args()
 
     try:
-        idx, meta = load_database()
+        # Determine which index to use
+        use_subset = not args.use_full_index
+        idx, meta = load_database(use_subset=use_subset)
         
         if args.vector:
             if args.vector.endswith('.npy'):

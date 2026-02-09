@@ -56,15 +56,21 @@ def main():
     filename = f"{text_prefix}_{prompt_id}.wav"
     output_wav_path = os.path.join(output_dir, filename)
 
-    # ZipVoice Python Executable (from zipvoice_py311 environment)
-    zipvoice_python = "/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311/bin/python"
-    
+    # ZipVoice environment path (allow override via env var)
+    zipvoice_env_path = os.environ.get(
+        "ZIPVOICE_ENV_PATH",
+        "/info/etu/m2/s2405959/miniconda3/envs/zipvoice_clean",
+    )
+    # ZipVoice Python Executable
+    zipvoice_python = os.path.join(zipvoice_env_path, "bin", "python")
+
     # ZipVoice Root Directory (to be added to PYTHONPATH)
-    zipvoice_root = "/info/raid-etu/m2/s2405959/VO2/ZipVoice"
+    zipvoice_root = os.environ.get(
+        "ZIPVOICE_ROOT",
+        "/info/raid-etu/m2/s2405959/VO2/ZipVoice",
+    )
 
     # Setup LD_LIBRARY_PATH for CUDA/cuDNN
-    # ZipVoice env path
-    zipvoice_env_path = "/info/etu/m2/s2405959/miniconda3/envs/zipvoice_py311"
     nvidia_path = os.path.join(zipvoice_env_path, "lib/python3.11/site-packages/nvidia")
     
     nvidia_libs = []
@@ -102,6 +108,9 @@ def main():
     # Add Nvidia libs to LD_LIBRARY_PATH
     current_ld_path = env.get("LD_LIBRARY_PATH", "")
     env["LD_LIBRARY_PATH"] = f"{current_ld_path}:{nvidia_lib_path}"
+
+    # Force CPU execution for ZipVoice (disable CUDA visibility)
+    env["CUDA_VISIBLE_DEVICES"] = ""
 
     try:
         subprocess.run(cmd, env=env, check=True)

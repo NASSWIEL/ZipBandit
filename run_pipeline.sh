@@ -47,6 +47,7 @@ BUFFER_PATH="$BASE_DIR/model/replay_buffer.pkl"
 TRAINING_LOG="$BASE_DIR/logs_agent/training_progress.csv"
 CHECKPOINT_DIR="$BASE_DIR/checkpoint"
 CHECKPOINT_INTERVAL=100
+AGENT_ENV_LIB="/info/etu/m2/s2405959/miniconda3/envs/agent_env/lib"
 
 # Create checkpoint directory if it doesn't exist
 mkdir -p "$CHECKPOINT_DIR"
@@ -56,9 +57,6 @@ if [ ! -f "$TRAINING_LOG" ]; then
   echo "sentence_num,iteration,cer,reward,similarity_score,epsilon" > "$TRAINING_LOG"
 fi
 
-source $(conda info --base)/etc/profile.d/conda.sh
-conda activate agent_env
-
 echo "Pipeline Started"
 echo "Reading sentences from: $SENTENCES_FILE"
 
@@ -66,19 +64,33 @@ echo "Reading sentences from: $SENTENCES_FILE"
 TOTAL_SENTENCES=$(wc -l < "$SENTENCES_FILE")
 echo "Total sentences to process: $TOTAL_SENTENCES"
 
-# EXPERT FIX: FIXED EPSILON (constant exploration)
-# Don't decay epsilon until we confirm learning is happening
-# Keep at 0.5 to maintain 50% exploration throughout training
-FIXED_EPSILON=0.5  # Constant 50% exploration
-ENTROPY_COEF=0.02  # Entropy regularization
+# Epsilon decay schedule
+# Start with moderate exploration (0.3) and decay to 0.05 over 500 episodes
+EPSILON_START=0.3
+EPSILON_END=0.05
+EPSILON_DECAY_STEPS=500
+
+# Entropy coefficient for diversity
+ENTROPY_COEF=0.15
+
+# Baseline reward tracking file for advantage estimation
+BASELINE_FILE="$TEMP_DIR/baseline_reward.txt"
+if [ ! -f "$BASELINE_FILE" ]; then
+    echo "0.5" > "$BASELINE_FILE"  # Initialize baseline to 0.5
+fi
 
 # Outer loop: iterate over each sentence
 SENTENCE_NUM=0
 while IFS= read -r SENTENCE || [ -n "$SENTENCE" ]; do
     SENTENCE_NUM=$((SENTENCE_NUM + 1))
     
-    # Use fixed epsilon (no decay) - keep exploration high until model shows learning
-    EPSILON=$FIXED_EPSILON
+    # Linear epsilon decay
+    # epsilon = max(EPSILON_END, EPSILON_START - (EPSILON_START - EPSILON_END) * step / DECAY_STEPS)
+    if [ $SENTENCE_NUM -le $EPSILON_DECAY_STEPS ]; then
+        EPSILON=$(python3 -c "print(max($EPSILON_END, $EPSILON_START - ($EPSILON_START - $EPSILON_END) * $SENTENCE_NUM / $EPSILON_DECAY_STEPS))")
+    else
+        EPSILON=$EPSILON_END
+    fi
     
     echo ""
     echo "========================================"
@@ -88,10 +100,10 @@ while IFS= read -r SENTENCE || [ -n "$SENTENCE" ]; do
     echo "========================================"
     
     echo "[1/7] Running Text Encoder..."
-    python3 "$BASE_DIR/model/text_encoder.py" --sentence "$SENTENCE" --output "$VEC_1024"
+    conda run -n agent_env python "$BASE_DIR/model/text_encoder.py" --sentence "$SENTENCE" --output "$VEC_1024"
 
     echo "[2/7] Running Agent Model..."
-    python3 "$BASE_DIR/model/agent_model.py" \
+    conda run -n agent_env python "$BASE_DIR/model/agent_model.py" \
       --input "$VEC_1024" \
       --output "$VEC_256" \
       --model_path "$MODEL_PATH" \
@@ -99,19 +111,19 @@ while IFS= read -r SENTENCE || [ -n "$SENTENCE" ]; do
       --epsilon "$EPSILON"
 
     echo "[3/7] Running Similarity Search..."
-    python3 "$BASE_DIR/Similarity/asess_similarty.py" --vector "$VEC_256" --output "$SIM_OUTPUT" --output_vector "$RETRIEVED_VEC"
+    conda run -n agent_env python "$BASE_DIR/Similarity/asess_similarty.py" --vector "$VEC_256" --output "$SIM_OUTPUT" --output_vector "$RETRIEVED_VEC"
     
     # Extract similarity score and prompt index for logging and diversity tracking
     if [ -f "$SIM_OUTPUT" ]; then
-        SIMILARITY_SCORE=$(python3 -c "import json; print(json.load(open('$SIM_OUTPUT'))['cosine_similarity'])")
-        PROMPT_IDX=$(python3 -c "import json; print(json.load(open('$SIM_OUTPUT')).get('nearest_idx', -1))")
+        SIMILARITY_SCORE=$(conda run -n agent_env python -c "import json; print(json.load(open('$SIM_OUTPUT'))['cosine_similarity'])")
+        PROMPT_IDX=$(conda run -n agent_env python -c "import json; print(json.load(open('$SIM_OUTPUT')).get('nearest_idx', -1))")
     else
         SIMILARITY_SCORE="N/A"
         PROMPT_IDX="-1"
     fi
 
     echo "[4/7] Generating Audio with ZipVoice..."
-    python3 "$BASE_DIR/generate_audio/generate_with_zipVoice.py" \
+    conda run -n agent_env python "$BASE_DIR/generate_audio/generate_with_zipVoice.py" \
       --similarity_output "$SIM_OUTPUT" \
       --target_text "$SENTENCE" \
       --output_path_file "$AUDIO_PATH_FILE"
@@ -125,7 +137,8 @@ while IFS= read -r SENTENCE || [ -n "$SENTENCE" ]; do
     fi
 
     echo "[5/7] Calculating CER..."
-    python3 "$BASE_DIR/assess_CER/calculate_cer.py" "$SENTENCE" "$GENERATED_AUDIO" --output_cer "$CER_OUTPUT"
+    env LD_LIBRARY_PATH="$AGENT_ENV_LIB${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+        conda run -n agent_env python "$BASE_DIR/assess_CER/calculate_cer.py" "$SENTENCE" "$GENERATED_AUDIO" --output_cer "$CER_OUTPUT"
 
     if [ -f "$CER_OUTPUT" ]; then
         CER_VALUE=$(cat "$CER_OUTPUT")
@@ -135,7 +148,7 @@ while IFS= read -r SENTENCE || [ -n "$SENTENCE" ]; do
     fi
 
     echo "[6/7] Calculating Weighted Reward..."
-    python3 "$BASE_DIR/assess_CER/weighted_cer.py" "$CER_VALUE" --output_reward "$REWARD_OUTPUT"
+    conda run -n agent_env python "$BASE_DIR/assess_CER/weighted_cer.py" "$CER_VALUE" --output_reward "$REWARD_OUTPUT"
 
     if [ -f "$REWARD_OUTPUT" ]; then
         REWARD_VALUE=$(cat "$REWARD_OUTPUT")
@@ -145,26 +158,35 @@ while IFS= read -r SENTENCE || [ -n "$SENTENCE" ]; do
         exit 1
     fi
 
-    echo "[7/7] Training Agent (Contrastive Learning with Fixed Exploration)..."
-    python3 "$BASE_DIR/model/train_agent.py" \
+    # Read current baseline reward for advantage estimation
+    BASELINE_REWARD=$(cat "$BASELINE_FILE")
+    
+    echo "[7/7] Training Agent (Improved Contrastive Learning with Advantage)..."
+    echo "    Epsilon: $EPSILON, Baseline: $BASELINE_REWARD"
+    conda run -n agent_env python "$BASE_DIR/model/train_agent.py" \
       --input_state "$VEC_1024" \
       --retrieved_action "$RETRIEVED_VEC" \
       --reward "$REWARD_VALUE" \
+      --baseline_reward "$BASELINE_REWARD" \
       --prompt_idx "$PROMPT_IDX" \
       --model_path "$MODEL_PATH" \
       --buffer_path "$BUFFER_PATH" \
       --use_replay \
       --buffer_capacity 5000 \
-      --entropy_coef 0.02 \
-      --diversity_penalty_weight 0.1 \
+      --entropy_coef "$ENTROPY_COEF" \
+      --diversity_penalty_weight 0.05 \
       --batch_size 64 \
       --num_epochs 10 \
       --epsilon "$EPSILON"
     
+    # Update baseline reward using exponential moving average (alpha=0.1)
+    NEW_BASELINE=$(python3 -c "print(0.9 * $BASELINE_REWARD + 0.1 * $REWARD_VALUE)")
+    echo "$NEW_BASELINE" > "$BASELINE_FILE"
+    
     # Log training progress
     echo "$SENTENCE_NUM,1,$CER_VALUE,$REWARD_VALUE,$SIMILARITY_SCORE" >> "$TRAINING_LOG"
     
-    # EXPERT FIX #4: EVALUATION PROTOCOL (every 50 sentences)
+    # Evaluation protocol (every 50 sentences)
     if [ $((SENTENCE_NUM % 50)) -eq 0 ]; then
         echo ""
         echo "========================================"

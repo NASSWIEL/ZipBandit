@@ -1,0 +1,7 @@
+{
+    "index": 3022,
+    "l2_distance": 1.7559040784835815,
+    "cosine_similarity": 0.12204796075820923,
+    "prompt_wav": "/info/corpus/Blizzard2023_segmented/segmented/NEB_train/reference_24khz/ES_LMP_NEB_01_0009_417866_420561.wav",
+    "prompt_transcription": "malheureusement je ne suis qu'un pauvre diable d'ouvrier"
+}
