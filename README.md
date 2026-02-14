@@ -199,6 +199,25 @@ The system utilizes a **Contextual Bandit** formulation with advanced exploratio
     - Prioritized sampling: Higher rewards are sampled more frequently.
     - Batch updates with batch size 32.
 
+## Pipeline Architecture
+
+The following diagram illustrates the complete architecture of the reinforcement learning pipeline:
+
+<p align="center">
+  <img src="images/architecture_pipline.png" alt="Pipeline Architecture" width="100%"/>
+</p>
+
+## Training Results
+
+The agent training demonstrates convergence through two key metrics:
+
+<p align="center">
+  <img src="images/loss_plot_agent.png" alt="Total Loss" width="49%"/>
+  <img src="images/loss_policy.png" alt="Policy Loss" width="49%"/>
+</p>
+
+*Left: Total agent loss over training iterations. Right: Policy loss showing the convergence of the action prediction head.*
+
 ### File Descriptions
 
 *   **`run_pipeline.sh`**: Main script running the 7-step RL loop on SLURM.
