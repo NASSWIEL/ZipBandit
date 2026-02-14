@@ -96,11 +96,6 @@ The input French sentence is encoded using the **SONAR Text Encoder** (`text_son
 
 **Step 2: Agent Prediction**
 The **Agent Model** (a deep neural network with residual blocks) takes the 1024-dim text vector as input and predicts a 256-dimensional vector. This output represents the "ideal" prompt embedding in the latent space that the agent believes will yield the best speech synthesis for the given text. The model architecture includes:
-- Residual blocks for better gradient flow
-- GELU activation functions
-- Layer normalization for training stability
-- Separate value head for advantage estimation
-- Optional manifold-aware exploration using k-means centroids
 
 **Step 3: Similarity Search**
 The system performs a Cosine Similarity search using **FAISS** between the agent's predicted vector and the pre-computed database of prompt embeddings. It retrieves the nearest neighbor (the most similar existing audio prompt) and returns its ID, WAV path, and transcription. The vectors are L2-normalized to ensure cosine similarity compatibility.
@@ -121,10 +116,6 @@ The agent is updated using the collected experience tuple `(State, Action, Rewar
 *   **Reward**: The calculated reward.
 
 The model uses a hybrid loss function combining:
-- **Contrastive Loss**: Pulls predicted vectors closer to successful prompts, pushes away from unsuccessful ones
-- **Value Loss**: Trains the value head to predict expected rewards for advantage estimation
-- **Entropy Regularization**: Encourages exploration diversity
-- **Diversity Penalty**: Discourages over-reliance on frequently selected prompts
 
 The training employs experience replay with prioritized sampling and epsilon-greedy exploration with gradual decay.
 
@@ -164,11 +155,6 @@ The system utilizes a **Contextual Bandit** formulation with advanced exploratio
 
 *   **Update Rule (Hybrid Loss)**:
     The model parameters `θ` are updated using a combination of losses:
-
-    1.  **Contrastive Loss** (reward-weighted attraction/repulsion):
-
-        ```text
-        If R > R_mean (attraction):
             L_contrastive =  λ(R) · || π_θ(s) − a_retrieved ||²
 
         If R ≤ R_mean (repulsion):
