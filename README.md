@@ -3,6 +3,25 @@
 ## Overview
 This repository contains the implementation of a Reinforcement Learning (RL) agent designed to optimize prompt selection for the ZipVoice Text-to-Speech model. The agent utilizes a Contextual Bandit approach to learn the mapping between input text and the optimal audio prompt embedding, aiming to minimize the Character Error Rate (CER) of the generated audio. The system operates in a one-shot learning manner, updating its policy based on the quality of the generated speech.
 
+## Pipeline Architecture
+
+The following diagram illustrates the complete architecture of the reinforcement learning pipeline:
+
+<p align="center">
+  <img src="images/architecture_pipline.png" alt="Pipeline Architecture" width="100%"/>
+</p>
+
+## Training Results
+
+The agent training demonstrates convergence through two key metrics:
+
+<p align="center">
+  <img src="images/loss_plot_agent.png" alt="Total Loss" width="49%"/>
+  <img src="images/loss_policy.png" alt="Policy Loss" width="49%"/>
+</p>
+
+*Left: Total agent loss over training iterations. Right: Policy loss showing the convergence of the action prediction head.*
+
 ## Structure
 The project is organized as follows:
 
@@ -198,25 +217,6 @@ The system utilizes a **Contextual Bandit** formulation with advanced exploratio
     - Buffer stores `(state, action, reward)` tuples with maximum capacity (default: 1000).
     - Prioritized sampling: Higher rewards are sampled more frequently.
     - Batch updates with batch size 32.
-
-## Pipeline Architecture
-
-The following diagram illustrates the complete architecture of the reinforcement learning pipeline:
-
-<p align="center">
-  <img src="images/architecture_pipline.png" alt="Pipeline Architecture" width="100%"/>
-</p>
-
-## Training Results
-
-The agent training demonstrates convergence through two key metrics:
-
-<p align="center">
-  <img src="images/loss_plot_agent.png" alt="Total Loss" width="49%"/>
-  <img src="images/loss_policy.png" alt="Policy Loss" width="49%"/>
-</p>
-
-*Left: Total agent loss over training iterations. Right: Policy loss showing the convergence of the action prediction head.*
 
 ### File Descriptions
 
